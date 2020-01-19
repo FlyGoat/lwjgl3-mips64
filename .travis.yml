@@ -1,0 +1,39 @@
+git:
+  depth: 3
+env:
+  global:
+  - JDK_LINUX: https://cdn.azul.com/zulu/bin/zulu8.42.0.23-ca-fx-jdk8.0.232-linux_x64.tar.gz
+  - JDK_MACOS: https://cdn.azul.com/zulu/bin/zulu8.42.0.23-ca-fx-jdk8.0.232-macosx_x64.tar.gz
+  - secure: ECJ0E2rX97C22jBLVWwa05lECZZWcfdvDSKoK4w5LvBVZk+y+3MXXv4LZkEqByPshmsKFAI+T3t/jLH+kNj8MfWF0Y+op2DoFl8Ulca1QZg4UxbKczhffgpg3qbyfeM/Hf0JvzGAP6foPDo1qygI41K8J9fJgJhOqtR1kKlErZ2ZVTybH8HLGv6SbIdUJ1JeVrxrshjCXL4FkN9TlO1dAD8jwPPKybkTnhIi5RoX4wUhsMzYtexJKxRDXgmOUVVAGgFNrc1PBSUpA50LxYpnyHR6q7nZ0/g91wJViofYiahMy/gtlZDqsKaYp168GhXbp6yj9JuH4iCNKSQZDpn62ZoxCY6k67BB+/lCUJU9Kz2n8Ayymp7HIOapyHv5eTjxOg8jmh99o60jK7YmEGlxy3WYtrFz5iVvnkFtX709k3p1bG4syEsiwBDe2+8uMCOD3J7lvvZALTLuQJ6eBFN/K+OgifanAWEXIzHvO5NeE5wCMec377uhZsDF3qjwtopWTepBFLZMEx+V5NxbD84D2VJNWuVY1wUg4W8WiMGNS4zadgpl8QioiyEphxbQVUABl0YlWqB0av0L/08fOzjmZEGjfq4mmz27OytrZcEtorGcFcJJPRkNwYHiKnx0yH8lOXtLVlA9WSio8DDFKrjdJ1O7qCHDEVFGmLcCP0kMjIE=
+matrix:
+  include:
+  - name: Linux mips64
+    dist: xenial
+    language: java
+    jdk: openjdk8
+    addons:
+      apt:
+        packages:
+        - ant
+        - gcc-5
+        - g++-5
+        - gcc-5-mips64el-linux-gnuabi64
+        - g++-5-mips64el-linux-gnuabi64
+        - libc6-dev-mips64el-cross
+    before_install:
+    - pip install --user awscli
+    - export PATH=$PATH:$HOME/.local/bin
+    - sudo rm -rf /etc/apt/sources.list
+    - sudo sh -c "echo 'deb http://deb.debian.org/debian stretch main' >> /etc/apt/sources.list"
+    - sudo dpkg --add-architecture mips64el
+    - sudo apt-get update || true
+    - sudo apt-get -yq --allow-unauthenticated install libglu-dev:mips64el libgl1-mesa-glx:mips64el
+      libx11-dev:mips64el libdrm2:mips64el libglapi-mesa:mips64el libgl1-mesa-dev:mips64el
+      libgl-dev:mips64el -o Dpkg::Options::="--force-overwrite"
+    script:
+    - export LWJGL_BUILD_TYPE=nightly
+    - export LWJGL_BUILD_ARCH=mips64
+    - curl $JDK_LINUX --output jdk8.tar.gz
+    - mkdir jdk8 && tar xf jdk8.tar.gz -C jdk8 --strip-components 1
+    - JAVA_HOME=$TRAVIS_BUILD_DIR/jdk8 ant compile-templates compile-native -Dgcc.version=5
+      -Dgcc.libpath.opengl=/usr/lib/mips64el-linux-gnuabi64/mesa
