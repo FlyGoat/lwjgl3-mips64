@@ -35,5 +35,5 @@ matrix:
     - export LWJGL_BUILD_ARCH=mips64
     - curl $JDK_LINUX --output jdk8.tar.gz
     - mkdir jdk8 && tar xf jdk8.tar.gz -C jdk8 --strip-components 1
-    - JAVA_HOME=$TRAVIS_BUILD_DIR/jdk8 ant compile-templates compile-native -Dgcc.version=5
+    - JAVA_HOME=$TRAVIS_BUILD_DIR/jdk8 ant compile-templates upload-native -Dgcc.version=5
       -Dgcc.libpath.opengl=/usr/lib/mips64el-linux-gnuabi64/mesa
