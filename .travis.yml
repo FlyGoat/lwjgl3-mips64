@@ -1,0 +1,57 @@
+git:
+  depth: 3
+env:
+  global:
+  - JDK_LINUX: https://cdn.azul.com/zulu/bin/zulu8.42.0.23-ca-fx-jdk8.0.232-linux_x64.tar.gz
+  - JDK_MACOS: https://cdn.azul.com/zulu/bin/zulu8.42.0.23-ca-fx-jdk8.0.232-macosx_x64.tar.gz
+matrix:
+  include:
+  - name: Linux mips64
+    dist: xenial
+    language: java
+    jdk: openjdk8
+    addons:
+      apt:
+        packages:
+        - ant
+        - gcc-4.8
+        - g++-4.8
+        - gcc-4.9
+        - g++-4.9
+        - xorg-dev
+        - libgtk-3-dev
+        - libglu-dev
+        - libgl1-mesa-glx
+        - libx11-dev
+        - gcc-5-mips64el-linux-gnuabi64
+        - g++-5-mips64el-linux-gnuabi64
+        - libc6-dev-mips64el-cross
+    before_install:
+    - pip install --user awscli
+    - export PATH=$PATH:$HOME/.local/bin
+    - sudo rm -rf /etc/apt/sources.list
+    - sudo sh -c "echo 'deb http://deb.debian.org/debian stretch main' >> /etc/apt/sources.list"
+    - sudo dpkg --add-architecture mips64el
+    - sudo apt-get update || true
+    - sudo apt-get -yq --allow-unauthenticated install libglu-dev:mips64el libgl1-mesa-glx:mips64el
+      libx11-dev:mips64el libdrm2:mips64el libglapi-mesa:mips64el libgl1-mesa-dev:mips64el
+      libgl-dev:mips64el -o Dpkg::Options::="--force-overwrite"
+    script:
+    - export LWJGL_BUILD_TYPE=nightly
+    - export LWJGL_BUILD_ARCH=mips64
+    - curl $JDK_LINUX --output jdk8.tar.gz
+    - mkdir jdk8 && tar xf jdk8.tar.gz -C jdk8 --strip-components 1
+    - export JAVA_HOME=$TRAVIS_BUILD_DIR/jdk8
+    - ant compile-templates compile-native -Dgcc.version=5 -Dgcc.libpath.opengl=/usr/lib/mips64el-linux-gnuabi64/mesa
+    - ant compile release
+    - tar czvf lwjgl3-mips64-release.tar.gz bin/RELEASE/*
+deploy:
+  provider: releases
+  api_key:
+    secure: mxiXJdB4g0IBrUvVpyz9GW+Sv2SK61xQFHGzE1Hr1BIDhQFsQFrfRWK/Lz16KGlrYlztXEh+4JK+iThvWLbvI0kLaPx4+oeDyEWFG2uwjfxvyeQSK3ZRzi0Pkxk4808nod6u6pM6aZKXyLxQg4ikKIAjAglubMcfXwXern5dLOudifIVFjEMuiOWwbaBz6aMcL0HQ/tSdNFhUNZtgWn4ML2Vc61bnNpi0eKFi/Ba3wpwXOtohQrvXYDxbVRj3rrnZf4saQ7E7YaEH9s4acy9BIJoV0J8SfeEwMBR2gSJNwsWDyPLY5UiA/SN243clGbfltFp3EW57Vzbu7IHntxL1nv/N8iCPm314qf2RZWOdVo1k13BGLJOow619WEyfCnV5iEBpESV7pL5TzXNhb9ZoRWnKkzL1JQqodHU5ySxBagn6wlZo3W1RgxJvEL5B6Kg2ubwJedNKu8tUjedjPDY0a0oynqpCAQA7TtM05M/h3fG409uU+alq35tI9uGM+Es/liA5vEObhb+P97CdJFgsKTTvBxkqRmi6XgtyAzmr7Di8tyuv03ei4DTfwWb/i9VIfOLlNommsHlShEC3daa/SXB+/s1Q8Z5VWHqsPmXFf7df38R6xRX8U3dHdZrwEU8lvTLcQw0QmAMLL1YgAtFGDmIcLiAWzUnG/lyAaYZs4o=
+  file: lwjgl3-mips64-release.tar.gz
+  skip_cleanup: true
+  draft: true
+  on:
+    branch: master
+    repo: FlyGoat/lwjgl3-mips64
