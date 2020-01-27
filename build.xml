@@ -981,8 +981,10 @@
                 <get-release platform="linux" arch="arm32" file="lib@{native-library}.so.git" if:set="git-revision"/>
 
 
-                <get-release platform="linux" arch="mips64" file="lib@{native-library}.so" if:set="auto-natives"/>
+                <get-release-offline arch="mips64" file="lib@{native-library}.so" if:set="auto-natives"/>
+<!--
                 <get-release platform="linux" arch="mips64" file="lib@{native-library}.so.git" if:set="git-revision"/>
+-->
 
                 <get-release platform="macos" arch="x64" file="lib@{native-library}.dylib" if:set="auto-natives"/>
                 <get-release platform="macos" arch="x64" file="lib@{native-library}.dylib.git" if:set="git-revision"/>
@@ -1187,6 +1189,7 @@
             </condition>
         </fail>
 
+<!-- 
         <local name="input"/>
         <input
             message="It is recommended to build LWJGL releases on JDK 10 or higher. Continue with current JDK?"
@@ -1200,6 +1203,7 @@
                 <equals arg1="n" arg2="${input}"/>
             </condition>
         </fail>
+-->
     </target>
 
     <!-- Set the LWJGL_BUILD_OFFLINE=true environment variable for local builds. -->
